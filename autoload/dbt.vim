@@ -1,4 +1,4 @@
-if !existst('g:dbt_target')
+if !exists('g:dbt_target')
     let g:dbt_target = 'dev'
 endif
 
@@ -8,7 +8,10 @@ function! s:DBT(...)
     if has('terminal')
         let cmd = "vert ter " . cmd
     endif
+    let _splitright = &splitright
+    set splitright
     exe cmd
+    let &splitright = _splitright
     let s:dbt_terminal = bufname("%")
     wincmd p
 endfunction
@@ -26,4 +29,42 @@ endfunction
 function! dbt#CloseTerm()
     let buffer = bufnr(s:dbt_terminal . '*')
     exe 'bd!' . buffer
+endfunction
+
+function! dbt#OpenRefs(...)
+    if a:0 == 0
+        let model = expand('<cWORD>')
+        if model !~? "ref('.*')"
+            return
+        else
+            let models = [strcharpart(model, 5, len(model)-7)]
+        endif
+    else
+        let models = a:000
+    endif
+
+    let p = fnamemodify('.', ':p')
+    while fnamemodify(p, ':p:h:t') != 'models'
+        let p = fnamemodify(p, ':p:h:h')
+    endwhile
+
+    for f in split(globpath('.', '**'))
+        if index(models, fnamemodify(f, ':t:r')) != -1
+            exe 'edit ' . f
+        endif
+    endfor
+endfunction
+
+function! dbt#OpenSchema(...)
+    let model = a:0 > 0 ? a:1 : expand('%:t:r')
+    let p = fnamemodify('.', ':p')
+    while fnamemodify(p, ':p:h') =~# '/models/*'
+        for f in split(globpath('.', '*'))
+            if f =~# '.*\.yml$'
+                exe "edit " . f | exe "normal! /name: " . model . "\<CR>"
+                return
+            endif
+        endfor
+        let p = fnamemodify(p, ':p:h:h')
+    endwhile
 endfunction
