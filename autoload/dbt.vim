@@ -2,6 +2,14 @@ if !exists('g:dbt_target')
     let g:dbt_target = 'dev'
 endif
 
+if !exists('g:dbt_term_vertical')
+    let g:dbt_term_vertical = 1
+endif
+
+if !exists('g:dbt_term_splitright')
+    let g:dbt_term_splitright = 1
+endif
+
 function! s:DBT(...)
     let models = a:0 > 0 ? join(a:000, ' ') : expand('%:t:r')
     let cmd = s:cmd_start . models . " --target " . g:dbt_target
@@ -67,4 +75,32 @@ function! dbt#OpenSchema(...)
         endfor
         let p = fnamemodify(p, ':p:h:h')
     endwhile
+endfunction
+
+function! dbt#Config(...)
+    if a:0 == 0
+        echoerr ""
+    endif
+
+    try
+        let win_view = winsaveview()
+        let old_query = getreg('/')
+        exe "norm! gg"
+        let result = search('config(', 'e')
+        if result == 0
+
+        elseif result == 1
+            exe "norm! %i <ESC>"
+        else
+            exe "norm! %O, <ESC>"
+        endif
+
+        for f in config
+            let pair = split(trim(f), '=')
+
+        endfor
+    finally
+        call winrestview(win_view)
+        call setreg('/', old_query)
+    endtry
 endfunction
