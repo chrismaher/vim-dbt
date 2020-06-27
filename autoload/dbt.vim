@@ -23,23 +23,13 @@ function! s:Exec(cmd)
     let &splitright = _splitright
 endfunction
 
-function! s:DBT(...)
+function! dbt#DBT(cmd, ...)
     let args = filter(copy(a:000), {_, v -> len(v) != 0})
     let models = len(args) > 0 ? join(args, ' ') : expand('%:t:r')
-    let cmd = s:cmd_start . models . " --target " . g:dbt_target
+    let cmd = "dbt ". a:cmd . " --models " . models . " --target " . g:dbt_target
     call s:Exec(cmd)
     let s:dbt_terminal = bufname("%")
     wincmd p
-endfunction
-
-function! dbt#Run(...)
-    let s:cmd_start = "dbt run --models "
-    call call("s:DBT", a:000)
-endfunction
-
-function! dbt#Test(...)
-    let s:cmd_start = "dbt test --models "
-    call call("s:DBT", a:000)
 endfunction
 
 function! dbt#CloseTerm()

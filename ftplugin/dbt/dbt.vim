@@ -1,5 +1,5 @@
-command! -nargs=* DbtRun exe dbt#Run(<q-args>)
-command! -nargs=* DbtTest exe dbt#Test(<q-args>)
+command! -nargs=* DbtRun exe dbt#DBT('run', <q-args>)
+command! -nargs=* DbtTest exe dbt#DBT('test', <q-args>)
 command! -nargs=0 DbtClose call dbt#CloseTerm()
 command! -nargs=* DbtRef exe dbt#OpenRefs(<q-args>)
 command! -nargs=? DbtSchema exe dbt#OpenSchema(<q-args>)
