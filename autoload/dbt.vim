@@ -38,15 +38,16 @@ function! dbt#CloseTerm()
 endfunction
 
 function! dbt#OpenRefs(...)
-    if a:0 == 0
+    let args = filter(copy(a:000), {_, v -> len(v) != 0})
+    if len(args) == 0
         let model = expand('<cWORD>')
         if model !~? "ref('.*')"
             return
         else
-            let models = [strcharpart(model, 5, len(model)-7)]
+            let models = [matchstr(model, '\vref\(''\zs.*\ze''\)')]
         endif
     else
-        let models = a:000
+        let models = args
     endif
 
     let p = fnamemodify('.', ':p')
@@ -54,7 +55,7 @@ function! dbt#OpenRefs(...)
         let p = fnamemodify(p, ':p:h:h')
     endwhile
 
-    for f in split(globpath('.', '**'))
+    for f in split(globpath(p, '**'))
         if index(models, fnamemodify(f, ':t:r')) != -1
             exe 'edit ' . f
         endif
