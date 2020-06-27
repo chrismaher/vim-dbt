@@ -10,7 +10,7 @@ if !exists('g:dbt_splitright')
     let g:dbt_splitright = 1
 endif
 
-function! s:Exec(cmd)
+function! s:Split(cmd)
     let _splitright = &splitright
     let _exec = 'terminal '
     if g:dbt_vertical
@@ -23,11 +23,19 @@ function! s:Exec(cmd)
     let &splitright = _splitright
 endfunction
 
-function! dbt#DBT(cmd, ...)
+function! dbt#Models(A, L, P)
+    let p = fnamemodify('.', ':p')
+    while fnamemodify(p, ':p:h:t') != 'models'
+        let p = fnamemodify(p, ':p:h:h')
+    endwhile
+   return  map(split(globpath(p, '**/' . a:A . '*.sql')), {_, v -> fnamemodify(v, ':t:r')})
+endfunction
+
+function! dbt#Exec(cmd, ...)
     let args = filter(copy(a:000), {_, v -> len(v) != 0})
     let models = len(args) > 0 ? join(args, ' ') : expand('%:t:r')
     let cmd = "dbt ". a:cmd . " --models " . models . " --target " . g:dbt_target
-    call s:Exec(cmd)
+    call s:Split(cmd)
     let s:dbt_terminal = bufname("%")
     wincmd p
 endfunction
