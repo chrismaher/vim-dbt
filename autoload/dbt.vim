@@ -2,13 +2,31 @@ if !exists('g:dbt_target')
     let g:dbt_target = 'dev'
 endif
 
+if !exists('g:dbt_vertical')
+    let g:dbt_vertical = 1
+endif
+
+if !exists('g:dbt_splitright')
+    let g:dbt_splitright = 1
+endif
+
+function! s:Exec(cmd)
+    let _splitright = &splitright
+    let _exec = 'terminal '
+    if g:dbt_vertical
+        let _exec = 'vertical ' . _exec
+    endif
+    if g:dbt_splitright
+        set splitright
+    endif
+    execute _exec . a:cmd
+    let &splitright = _splitright
+endfunction
+
 function! s:DBT(...)
     let models = a:0 > 0 ? join(a:000, ' ') : expand('%:t:r')
     let cmd = s:cmd_start . models . " --target " . g:dbt_target
-    if has('terminal')
-        let cmd = "vert ter " . cmd
-    endif
-    exe cmd
+    call s:Exec(cmd)
     let s:dbt_terminal = bufname("%")
     wincmd p
 endfunction
