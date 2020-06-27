@@ -2,27 +2,43 @@ if !exists('g:dbt_target')
     let g:dbt_target = 'dev'
 endif
 
-function! s:DBT(...)
-    let models = a:0 > 0 ? join(a:000, ' ') : expand('%:t:r')
-    let cmd = s:cmd_start . models . " --target " . g:dbt_target
-    if has('terminal')
-        let cmd = "vert ter " . cmd
-    endif
+if !exists('g:dbt_vertical')
+    let g:dbt_vertical = 1
+endif
+
+if !exists('g:dbt_splitright')
+    let g:dbt_splitright = 1
+endif
+
+function! s:Exec(cmd)
     let _splitright = &splitright
-    set splitright
-    exe cmd
+    let _exec = 'terminal '
+    if g:dbt_vertical
+        let _exec = 'vertical ' . _exec
+    endif
+    if g:dbt_splitright
+        set splitright
+    endif
+    execute _exec . a:cmd
     let &splitright = _splitright
+endfunction
+
+function! s:DBT(...)
+    let args = filter(copy(a:000), {_, v -> len(v) != 0})
+    let models = len(args) > 0 ? join(args, ' ') : expand('%:t:r')
+    let cmd = s:cmd_start . models . " --target " . g:dbt_target
+    call s:Exec(cmd)
     let s:dbt_terminal = bufname("%")
     wincmd p
 endfunction
 
 function! dbt#Run(...)
-    let s:cmd_start = "dbt run -m "
+    let s:cmd_start = "dbt run --models "
     call call("s:DBT", a:000)
 endfunction
 
 function! dbt#Test(...)
-    let s:cmd_start = "dbt test -m "
+    let s:cmd_start = "dbt test --models "
     call call("s:DBT", a:000)
 endfunction
 

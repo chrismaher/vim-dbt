@@ -1,8 +1,8 @@
 command! -nargs=* DbtRun exe dbt#Run(<q-args>)
 command! -nargs=* DbtTest exe dbt#Test(<q-args>)
 command! -nargs=0 DbtClose call dbt#CloseTerm()
-command! -nargs=* DbtRef call dbt#OpenRef(<q-args>)
-command! -nargs=? DbtSchema call dbt#OpenSchema(<q-args>)
+command! -nargs=* DbtRef exe dbt#OpenRefs(<q-args>)
+command! -nargs=? DbtSchema exe dbt#OpenSchema(<q-args>)
 
 " Plugin mappings
 nnoremap <silent> <Plug>(dbt-run) :<C-u>call dbt#Run()<CR>
