@@ -10,6 +10,14 @@ if !exists('g:dbt_splitright')
     let g:dbt_splitright = 1
 endif
 
+function! s:ModelsDir()
+    let path = fnamemodify('.', ':p')
+    while fnamemodify(path, ':p:h:t') != 'models'
+        let path = fnamemodify(path, ':p:h:h')
+    endwhile
+    return path
+endfunction
+
 function! s:Split(cmd)
     let _splitright = &splitright
     let _exec = 'terminal '
@@ -24,11 +32,8 @@ function! s:Split(cmd)
 endfunction
 
 function! dbt#Models(A, L, P)
-    let p = fnamemodify('.', ':p')
-    while fnamemodify(p, ':p:h:t') != 'models'
-        let p = fnamemodify(p, ':p:h:h')
-    endwhile
-   return  map(split(globpath(p, '**/' . a:A . '*.sql')), {_, v -> fnamemodify(v, ':t:r')})
+    let path = s:ModelsDir()
+    return  map(split(globpath(path, '**/' . a:A . '*.sql')), {_, v -> fnamemodify(v, ':t:r')})
 endfunction
 
 function! dbt#Exec(cmd, ...)
@@ -42,7 +47,7 @@ endfunction
 
 function! dbt#CloseTerm()
     let buffer = bufnr(s:dbt_terminal . '*')
-    exe 'bd!' . buffer
+    execute 'bdelete!' . buffer
 endfunction
 
 function! dbt#OpenRefs(...)
@@ -58,28 +63,31 @@ function! dbt#OpenRefs(...)
         let models = args
     endif
 
-    let p = fnamemodify('.', ':p')
-    while fnamemodify(p, ':p:h:t') != 'models'
-        let p = fnamemodify(p, ':p:h:h')
-    endwhile
+    let path = s:ModelsDir()
 
-    for f in split(globpath(p, '**'))
-        if index(models, fnamemodify(f, ':t:r')) != -1
-            exe 'edit ' . f
+    for fname in split(globpath(path, '**/*.sql'))
+        if index(models, fnamemodify(fname, ':t:r')) != -1
+            execute 'edit ' . fname
         endif
     endfor
 endfunction
 
 function! dbt#OpenSchema(...)
-    let model = a:0 > 0 ? a:1 : expand('%:t:r')
-    let p = fnamemodify('.', ':p')
-    while fnamemodify(p, ':p:h') =~# '/models/*'
-        for f in split(globpath('.', '*'))
-            if f =~# '.*\.yml$'
-                exe "edit " . f | exe "normal! /name: " . model . "\<CR>"
-                return
-            endif
-        endfor
-        let p = fnamemodify(p, ':p:h:h')
+    let args = filter(copy(a:000), {_, v -> len(v) != 0})
+    let model = len(args) > 0 ? args[0] : expand('%:t:r')
+    let path = expand('%:p:h')
+    while fnamemodify(path, ':p:h') =~# '/models/*'
+        let files = split(globpath(path, '*.yml'))
+        if len(files) == 0
+            continue
+        elseif len(files) == 1
+            " why isn't this opening with cursor on search match?
+            execute 'edit +/' . model . ' ' . files[0]
+            return
+        else
+            " handle this as error case
+            return
+        endif
+        let path = fnamemodify(path, ':p:h:h')
     endwhile
 endfunction
