@@ -24,26 +24,55 @@ endfunction
 
 function! s:send_command(cmd)
     let bnr = bufnr(g:dbt_term_buffer)
-    echom a:cmd
-    if bnr < 1
-        call term_start('bash --noprofile --norc', {'term_name': g:dbt_term_buffer, 'vertical': 1, 'term_cols': '60'})
-    else
-        call term_sendkeys(bnr, a:cmd . "\<cr>")
+    let bwr = bufwinnr(bnr)
+    if bwr < 1
+        call dbt#Toggle()
     endif
+    execute bnr . 'wincmd w'
+    call term_start(a:cmd, {'term_name': g:dbt_term_buffer, 'vertical': 1, 'curwin': 1, 'term_cols': '60'})
+endfunction
+
+function! dbt#Toggle()
+    let bn = bufnr(g:dbt_term_buffer)
+    let bwn = bufwinnr(bn)
+    " let ws = win_findbuf(bnr)
+    if bwn < 1
+        let _splitright = &splitright
+        if g:dbt_splitright
+            set splitright
+        endif
+        if bn < 1
+            call term_start('echo', {'term_name': g:dbt_term_buffer, 'vertical': 1, 'term_cols': '60'})
+            " setlocal hidden
+            setlocal bufhidden=hide
+            " execute 'vertical split ' . g:dbt_term_buffer
+        else
+            execute 'vertical sbuffer' . bn
+        endif
+        let &splitright = _splitright
+        wincmd p
+    else
+        execute bwn . 'close'
+        " 3wincmd w
+    endif
+
+    " if bnr < 1
+        " call term_start(a:cmd, {'term_name': g:dbt_term_buffer, 'vertical': 1, 'term_cols': '60'})
+    " else
 endfunction
 
 function! s:Split(cmd)
-    let _splitright = &splitright
+    " let _splitright = &splitright
     " let _exec = 'terminal '
     " if g:dbt_vertical
     "     let _exec = 'vertical ' . _exec
     " endif
-    if g:dbt_splitright
-        set splitright
-    endif
+    " if g:dbt_splitright
+        " set splitright
+    " endif
     " execute _exec . a:cmd
     call s:send_command(a:cmd)
-    let &splitright = _splitright
+    " let &splitright = _splitright
 endfunction
 
 function! dbt#Models(A, L, P)
