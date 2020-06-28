@@ -10,6 +10,10 @@ if !exists('g:dbt_splitright')
     let g:dbt_splitright = 1
 endif
 
+if !exists('g:dbt_term_buffer')
+    let g:dbt_term_buffer = '__dbt__'
+endif
+
 function! s:ModelsDir()
     let path = fnamemodify('.', ':p')
     while fnamemodify(path, ':p:h:t') != 'models'
@@ -18,16 +22,27 @@ function! s:ModelsDir()
     return path
 endfunction
 
+function! s:send_command(cmd)
+    let bnr = bufnr(g:dbt_term_buffer)
+    echom a:cmd
+    if bnr < 1
+        call term_start('bash --noprofile --norc', {'term_name': g:dbt_term_buffer, 'vertical': 1, 'term_cols': '60'})
+    else
+        call term_sendkeys(bnr, a:cmd . "\<cr>")
+    endif
+endfunction
+
 function! s:Split(cmd)
     let _splitright = &splitright
-    let _exec = 'terminal '
-    if g:dbt_vertical
-        let _exec = 'vertical ' . _exec
-    endif
+    " let _exec = 'terminal '
+    " if g:dbt_vertical
+    "     let _exec = 'vertical ' . _exec
+    " endif
     if g:dbt_splitright
         set splitright
     endif
-    execute _exec . a:cmd
+    " execute _exec . a:cmd
+    call s:send_command(a:cmd)
     let &splitright = _splitright
 endfunction
 
