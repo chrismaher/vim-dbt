@@ -1,72 +1,71 @@
 *vim-dbt* dbt development plugin
 
-====================================================================
+==========================================================================
 CONTENTS                                            *dbtContents*
 
     1. Intro ................ |dbtIntro|
-    2. Install .............. |dbtInstall|
-    3. Commands ............. |dbtCommands|
-    4. Configuration ........ |dbtConfiguration|
-    5. Mappings ............. |dbtMappings|
-    6. License .............. |dbtLicense|
-
+    2. Commands ............. |dbtCommands|
+    3. Configuration ........ |dbtConfiguration|
+    4. Mappings ............. |dbtMappings|
+    5. License .............. |dbtLicense|
 
 ==============================================================================
 1. Intro                                                           *dbtIntro*
 
-dbt (data build tool) support for Vim. vim-dbt comes with 
+dbt (data build tool) support for Vim. vim-dbt comes with filetype detection 
+that determines when .sql and .yml files belong to a dbt project, dbt syntax 
+highlighting (based on jinja2 + SQL syntax), and commands & mappings for 
+running core dbt commands from within vim.
 
 ==============================================================================
-2. Install                                                           *dbtIntro*
-
-dbt (data build tool) support for Vim. vim-dbt comes with 
-
-==============================================================================
-3. Commands                                                      *dbtCommands*
+2. Commands                                                      *dbtCommands*
 
                                                                    *:DbtRun*
 :DbtRun
-    DbtRun opens the default browser and starts a new bug report
-    with useful system information.
+    Run one or more models against the target environment (see |g:dbt_target|).
+    The argument completion is enabled for model names:
+
+    `:DbtRun dim_<TAB>` or `:DbtRun dim_<C-A>`
+
+    When run with no arguments, the command will take the filename of the 
+    current buffer (sans extension) as its argument.
 
                                                                    *:DbtTest*
 :DbtTest
-    DbtTest opens the default browser and starts a new bug report
-    with useful system information.
+    Test one or more models agains the target environment; accepts arguments in 
+    the same way as |DbtRun|.
 
-                                                                   *:DbtClose*
-:DbtClose
-    DbtClose opens the default browser and starts a new bug report
-    with useful system information.
+                                                                   *:DbtToggle*
+:DbtToggle
+    Toggles the dbt terminal window open or closed.
 
                                                                    *:DbtRef*
 :DbtRef
-    DbtRef opens the default browser and starts a new bug report
-    with useful system information.
+    If called without arguments, then it should be called with a "ref()" under 
+    the cursor; otherwise, it can open model files taken from an argument list.
 
                                                                    *:DbtSchema*
 :DbtSchema
-    DbtSchema opens the default browser and starts a new bug report
-    with useful system information.
+    Opens the relevant schema file for the model in the current buffer.
 
 ==============================================================================
-4. Configuration                                            *dbtConfiguration*
+3. Configuration                                            *dbtConfiguration*
 
-You can configure the following settings to change how Clam works.
+You can configure the following settings to change how vim-dbt works.
 
 ------------------------------------------------------------------------------
-3.1 g:clam_autoreturn                                *DbtConfiguration_target*
+4.1 g:clam_autoreturn                                *DbtConfiguration_target*
 
 ==============================================================================
-5. Mappings                                                      *dbtMappings*
+4. Mappings                                                      *dbtMappings*
 
 vim-dbt has several <Plug> mappings that can be used to create custom mappings.
 
 Available <Plug> keys are:
 
-                                                                    *(go-run)*
+                                                                    *(dbt-run)*
 
-Calls `go run` for the current main package
+Calls `dbt run` for the model in the current buffer
 
                                                                 *(go-run-tab)*
 
