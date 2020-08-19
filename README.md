@@ -1,4 +1,4 @@
-# vim-lookml
+# vim-dbt
 
 This plugin adds simple functionality for working within a [dbt](https://docs.getdbt.com/docs/introduction/) project. Features include:
 * A `dbt` filetype, and filetype detection when within a dbt project.
