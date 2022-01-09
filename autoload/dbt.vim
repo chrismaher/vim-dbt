@@ -20,7 +20,7 @@ function! s:Job(cmd)
         let _exec = g:dbt_window . ' '
     endif
 
-    let _buf = 'dbtout'
+    let _buf = '1.dbtout'
     if bufwinnr(_buf) == -1
         let cmd = _exec . 'new ' . _buf
         echom cmd
@@ -28,13 +28,6 @@ function! s:Job(cmd)
         set buftype=nofile
         " nowrap should be an option?
         setlocal nonumber nowrap
-
-        hi Passes term=bold ctermfg=DarkGreen
-        match Passes /\[\zsPASS\ze/
-        hi Failures term=bold ctermfg=DarkRed
-        2match Failures /\[\zsFAIL \d\+\ze/
-        hi Warnings term=bold ctermfg=DarkYellow
-        3match Warnings /\[\zsWARN \d\+\ze/
     else
         let bn = bufnr(_buf)
         if bn == -1
