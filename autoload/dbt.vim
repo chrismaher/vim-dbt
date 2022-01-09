@@ -1,13 +1,9 @@
 if !exists('g:dbt_target')
-    let g:dbt_target = 'dev'
+    let g:dbt_target = 'workspace'
 endif
 
-if !exists('g:dbt_vertical')
-    let g:dbt_vertical = 1
-endif
-
-if !exists('g:dbt_splitright')
-    let g:dbt_splitright = 1
+if !exists('g:dbt_window')
+    let g:dbt_window = 1
 endif
 
 function! s:ModelsDir()
@@ -18,36 +14,52 @@ function! s:ModelsDir()
     return path
 endfunction
 
-function! s:Split(cmd)
-    let _splitright = &splitright
-    let _exec = 'terminal '
-    if g:dbt_vertical
-        let _exec = 'vertical ' . _exec
+function! s:Job(cmd)
+    let _exec = ''
+    if g:dbt_window != ''
+        let _exec = g:dbt_window . ' '
     endif
-    if g:dbt_splitright
-        set splitright
+
+    let _buf = 'dbtout'
+    if bufwinnr(_buf) == -1
+        let cmd = _exec . 'new ' . _buf
+        echom cmd
+        execute cmd
+        set buftype=nofile
+        " nowrap should be an option?
+        setlocal nonumber nowrap
+
+        hi Passes term=bold ctermfg=DarkGreen
+        match Passes /\[\zsPASS\ze/
+        hi Failures term=bold ctermfg=DarkRed
+        2match Failures /\[\zsFAIL \d\+\ze/
+        hi Warnings term=bold ctermfg=DarkYellow
+        3match Warnings /\[\zsWARN \d\+\ze/
+    else
+        let bn = bufnr(_buf)
+        if bn == -1
+            execute _exec . 'sbuffer '. _buf
+        else
+            execute bufwinnr(bn) 'wincmd w'
+        endif
+        set modifiable
+        execute 'normal! ggdG'
     endif
-    execute _exec . a:cmd
-    let &splitright = _splitright
+
+    call job_start(a:cmd, {'out_io': 'buffer', 'out_name': _buf, 'out_modifiable': 0}) " NERD_tree_1
+    wincmd p
 endfunction
 
 function! dbt#Models(A, L, P)
     let path = s:ModelsDir()
-    return  map(split(globpath(path, '**/' . a:A . '*.sql')), {_, v -> fnamemodify(v, ':t:r')})
+    return map(split(globpath(path, '**/' . a:A . '*.sql')), {_, v -> fnamemodify(v, ':t:r')})
 endfunction
 
 function! dbt#Exec(cmd, ...)
     let args = filter(copy(a:000), {_, v -> len(v) != 0})
     let models = len(args) > 0 ? join(args, ' ') : expand('%:t:r')
-    let cmd = "dbt ". a:cmd . " --models " . models . " --target " . g:dbt_target
-    call s:Split(cmd)
-    let s:dbt_terminal = bufname("%")
-    wincmd p
-endfunction
-
-function! dbt#CloseTerm()
-    let buffer = bufnr(s:dbt_terminal . '*')
-    execute 'bdelete!' . buffer
+    let cmd = "dbt ". a:cmd . " --models " . models
+    call s:Job(cmd)
 endfunction
 
 function! dbt#OpenRefs(...)

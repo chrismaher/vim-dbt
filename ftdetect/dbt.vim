@@ -2,7 +2,7 @@ function! DetectDBT()
     let root = fnamemodify('~', ':p')
     let cwd = expand('%:p:h')
 
-    while (cwd . '/') != root
+    while (cwd . '/') != root && cwd =~# root
         let dbt_project = join([cwd, "dbt_project.yml"], "/")
         if filereadable(dbt_project)
             " this is hacky, as it sets ft for a second time
