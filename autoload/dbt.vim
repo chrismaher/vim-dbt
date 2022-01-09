@@ -21,16 +21,16 @@ function! s:Job(cmd)
     endif
 
     let _buf = '1.dbtout'
-    if bufwinnr(_buf) == -1
+    let bn = bufnr(_buf)
+    if bn == -1
         let cmd = _exec . 'new ' . _buf
-        echom cmd
         execute cmd
         set buftype=nofile
         " nowrap should be an option?
-        setlocal nonumber nowrap
+        setlocal nonumber nowrap hidden
     else
-        let bn = bufnr(_buf)
-        if bn == -1
+        let wn = bufwinnr(bn)
+        if wn == -1
             execute _exec . 'sbuffer '. _buf
         else
             execute bufwinnr(bn) 'wincmd w'
