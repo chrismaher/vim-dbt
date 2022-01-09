@@ -3,7 +3,7 @@ if !exists('g:dbt_target')
 endif
 
 if !exists('g:dbt_window')
-    let g:dbt_window = 1
+    let g:dbt_window = 'vertical'
 endif
 
 function! s:ModelsDir()

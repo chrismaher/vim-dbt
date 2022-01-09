@@ -13,4 +13,5 @@ function! DetectDBT()
 	endwhile
 endfunction
 
-au BufNewFile,BufRead *.sql,*.yml call DetectDBT()
+autocmd BufNewFile,BufRead *.sql,*.yml call DetectDBT()
+autocmd BufNewFile,BufRead *.dbtout set filetype dbtout
